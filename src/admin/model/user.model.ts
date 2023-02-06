@@ -2,10 +2,10 @@ export interface Users {
   id: string;
   name: string;
   email: string;
-  role: userRole;
+  role: UserRole;
 }
 
-export enum userRole {
+export enum UserRole {
   ADMIN = 'admin',
   EMPLOYEE = 'employee',
   SELLER = 'seller',

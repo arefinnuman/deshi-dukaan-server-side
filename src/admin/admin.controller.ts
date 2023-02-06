@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Users } from './model/user.model';
 
-@Controller('admin')
+@Controller('/admin')
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
@@ -12,24 +12,56 @@ export class AdminController {
   createUser(@Body() createUserDto: CreateUserDto): Users {
     return this.adminService.createUser(createUserDto);
   }
-
-  //   Get all Users
+  // Get all Users
   @Get('/all-users')
   getAllUser(): Users[] {
     return this.adminService.getAllUser();
   }
+  // Get an user by id
+  @Get('/user/:id')
+  getUserById(@Param('id') id: string): Users {
+    return this.adminService.getUserById(id);
+  }
 
-  // Find all Admins
-  // FInd all Employees
-  // Find all Sellers
-  // Find all Customers
+  // Get all Admin
+  @Get('/all-admin')
+  getAdmin(): Users[] {
+    return this.adminService.getAllAdmin();
+  }
+  // Get all Employee
+  @Get('/all-employee')
+  getEmployee(): Users[] {
+    return this.adminService.getAllEmployee();
+  }
+  // Get all Seller
+  @Get('/all-seller')
+  getSeller(): Users[] {
+    return this.adminService.getAllSeller();
+  }
+  // Get all Customer
+  @Get('/all-customer')
+  getCustomer(): Users[] {
+    return this.adminService.getAllCustomer();
+  }
 
-  // Find one Admin
-  // Find one Employee
-  // Find one Seller
-  // Find one Customer
-
-  // Make Admin
-  // Make Employee
-  // Make Seller
+  // Update user to admin
+  @Put('/update-to-admin/:id')
+  updateToAdmin(@Param('id') id: string): Users {
+    return this.adminService.updateToAdmin(id);
+  }
+  // Update user to employee
+  @Put('/update-to-employee/:id')
+  updateToEmployee(@Param('id') id: string): Users {
+    return this.adminService.updateToEmployee(id);
+  }
+  // Update user to seller
+  @Put('/update-to-seller/:id')
+  updateToSeller(@Param('id') id: string): Users {
+    return this.adminService.updateToSeller(id);
+  }
+  // Update user to customer
+  @Put('/update-to-customer/:id')
+  updateToCustomer(@Param('id') id: string): Users {
+    return this.adminService.updateToCustomer(id);
+  }
 }
