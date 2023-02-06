@@ -4,7 +4,6 @@ import { AuthModule } from './auth/auth.module';
 import { CustomerModule } from './customer/customer.module';
 import { EmployeeModule } from './employee/employee.module';
 import { SellerModule } from './seller/seller.module';
-import { TaskService } from './task/task.service';
 
 @Module({
   imports: [
@@ -14,6 +13,5 @@ import { TaskService } from './task/task.service';
     SellerModule,
     CustomerModule,
   ],
-  providers: [TaskService],
 })
 export class AppModule {}
