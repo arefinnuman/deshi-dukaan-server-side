@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRole, Users } from './model/user.model';
@@ -26,7 +26,11 @@ export class AdminService {
   }
   // get an user by id
   getUserById(id: string): Users {
-    return this.user.find((user) => user.id === id);
+    const found = this.user.find((user) => user.id === id);
+    if (!found) {
+      throw new NotFoundException(`User with Id '${id}' not found`);
+    }
+    return found;
   }
 
   // get only admin
@@ -73,6 +77,7 @@ export class AdminService {
 
   // delete user
   deleteUser(id: string): void {
-    this.user = this.user.filter((user) => user.id !== id);
+    const found = this.getUserById(id);
+    this.user = this.user.filter((user) => user.id !== found.id);
   }
 }

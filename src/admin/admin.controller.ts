@@ -6,6 +6,8 @@ import {
   Param,
   Post,
   Put,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,6 +19,7 @@ export class AdminController {
 
   // Create User
   @Post('/create-user')
+  @UsePipes(ValidationPipe)
   createUser(@Body() createUserDto: CreateUserDto): Users {
     return this.adminService.createUser(createUserDto);
   }
