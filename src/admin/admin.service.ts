@@ -70,4 +70,9 @@ export class AdminService {
     user.role = UserRole.CUSTOMER;
     return user;
   }
+
+  // delete user
+  deleteUser(id: string): void {
+    this.user = this.user.filter((user) => user.id !== id);
+  }
 }
