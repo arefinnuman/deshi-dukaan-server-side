@@ -6,12 +6,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Users } from './model/user.model';
+import { GetUserFilterDto } from './dto/get-user-filter.dto';
+import { UserRole, Users } from './model/user.model';
+import { RoleValidationPipe } from './pipes/role-validation.pipes';
 
 @Controller('/admin')
 export class AdminController {
@@ -23,10 +26,14 @@ export class AdminController {
   createUser(@Body() createUserDto: CreateUserDto): Users {
     return this.adminService.createUser(createUserDto);
   }
-  // Get all Users
+  // Get Users
   @Get('/all-users')
-  getAllUser(): Users[] {
-    return this.adminService.getAllUser();
+  getUser(@Query(ValidationPipe) filterDto: GetUserFilterDto): Users[] {
+    if (Object.keys(filterDto).length) {
+      return this.adminService.getUserWithFilters(filterDto);
+    } else {
+      return this.adminService.getAllUser();
+    }
   }
   // Get an user by id
   @Get('/user/:id')
@@ -74,6 +81,14 @@ export class AdminController {
   @Put('/update-to-customer/:id')
   updateToCustomer(@Param('id') id: string): Users {
     return this.adminService.updateToCustomer(id);
+  }
+  // Update user role manually
+  @Put('/update-user-role/:id')
+  updateUserRole(
+    @Param('id') id: string,
+    @Body('role', RoleValidationPipe) role: UserRole,
+  ): Users {
+    return this.adminService.updateUserRole(id, role);
   }
 
   // Delete user

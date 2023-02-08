@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as uuid from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
+import { GetUserFilterDto } from './dto/get-user-filter.dto';
 import { UserRole, Users } from './model/user.model';
 
 @Injectable()
@@ -24,6 +25,20 @@ export class AdminService {
   getAllUser(): Users[] {
     return this.user;
   }
+  getUserWithFilters(filterDto: GetUserFilterDto): Users[] {
+    const { search, role } = filterDto;
+    let users = this.getAllUser();
+    if (search) {
+      users = users.filter(
+        (user) => user.name.includes(search) || user.email.includes(search),
+      );
+    }
+    if (role) {
+      users = users.filter((user) => user.role === role);
+    }
+    return users;
+  }
+
   // get an user by id
   getUserById(id: string): Users {
     const found = this.user.find((user) => user.id === id);
@@ -72,6 +87,12 @@ export class AdminService {
   updateToCustomer(id: string): Users {
     const user = this.getUserById(id);
     user.role = UserRole.CUSTOMER;
+    return user;
+  }
+  // update user role manually
+  updateUserRole(id: string, role: UserRole): Users {
+    const user = this.getUserById(id);
+    user.role = role;
     return user;
   }
 
