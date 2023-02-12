@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { RegisterCustomer } from './dto/register-customer.dto';
 
@@ -24,6 +24,6 @@ export class CustomerController {
   login(@Body() loginCustomer: RegisterCustomer) {
     return loginCustomer;
   }
-  @Put('/update/:id')
-  update(@Param('id') id: number, @Body() customerUpdate: RegisterCustomer) {}
+  //   @Put('/update/:id')
+  //   update(@Param('id') id: number, @Body() customerUpdate: RegisterCustomer) {}
 }
