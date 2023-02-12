@@ -26,4 +26,7 @@ export class CustomerController {
   }
   @Put('/update/:id')
   update(@Param('id') id: number, @Body() customerUpdate: RegisterCustomer) {}
+  // Arefin valana
+
 }
+
