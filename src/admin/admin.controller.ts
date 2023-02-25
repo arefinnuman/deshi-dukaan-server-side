@@ -27,14 +27,6 @@ export class AdminController {
   createUser(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
     return this.adminService.createUser(createUserDto);
   }
-  
-  // Get Users
-  // @Get('/all-users')
-  // getAllUser(): Promise<UserEntity[]> {
-  //   return this.adminService.getAllUser();
-  // }
-  
-
 
   @Get()   
   getUser(@Query(ValidationPipe) filterDto: GetUserFilterDto): Promise<UserEntity[]> {
@@ -71,22 +63,22 @@ export class AdminController {
 
   // Update user to admin
   @Put('/update-to-admin/:id')
-  updateToAdmin(@Param('id') id: number): Promise<any> {
+  updateToAdmin(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.adminService.updateToAdmin(id);
   }
   // Update user to employee
   @Put('/update-to-employee/:id')
-  updateToEmployee(@Param('id') id: number): Promise<any> {
+  updateToEmployee(@Param('id', ParseIntPipe ) id: number): Promise<any> {
     return this.adminService.updateToEmployee(id);
   }
   // Update user to seller
   @Put('/update-to-seller/:id')
-  updateToSeller(@Param('id') id: number): Promise<any> {
+  updateToSeller(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.adminService.updateToSeller(id);
   }
   // Update user to customer
   @Put('/update-to-customer/:id')
-  updateToCustomer(@Param('id') id: number): Promise<any> {
+  updateToCustomer(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.adminService.updateToCustomer(id);
   }
   // Update user role manually
@@ -97,10 +89,10 @@ export class AdminController {
   ): Promise<any> {
     return this.adminService.updateUserRole(id, role);
   }
-
+  
   // Delete user
   @Delete('/delete-user/:id')
-  deleteUser(@Param('id') id: number): Promise<any> {
+  deleteUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.adminService.deleteUser(id);
   }
 }

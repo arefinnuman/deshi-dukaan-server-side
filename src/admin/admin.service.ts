@@ -20,7 +20,7 @@ export class AdminService {
     const user = new UserEntity();
     user.name = name;
     user.email = email;
-    user.role = UserRole.ADMIN;
+    user.role = UserRole.CUSTOMER;
     await user.save();
 
     return user;
@@ -86,29 +86,45 @@ export class AdminService {
   }
 
   // Update user to Admin
-  updateToAdmin(id: number): Promise<any> {
-    return this.userRepository.update({ id }, { role: UserRole.ADMIN });
+  async updateToAdmin(id: number): Promise<any> {
+    const user = await this.getUserById(id);
+    user.role = UserRole.ADMIN;
+    await user.save();
+    return user;
   }
-
   // Update user to Employee
-  updateToEmployee(id: number): Promise<any> {
-    return this.userRepository.update({ id }, { role: UserRole.EMPLOYEE });
+  async updateToEmployee(id: number): Promise<any> {
+    const user = await this.getUserById(id);
+    user.role = UserRole.EMPLOYEE;
+    await user.save();
+    return user;
   }
   // Update user to Seller
-  updateToSeller(id: number): Promise<any> {
-    return this.userRepository.update({ id }, { role: UserRole.SELLER });
+  async updateToSeller(id: number): Promise<any> {
+    const user = await this.getUserById(id);
+    user.role = UserRole.SELLER;
+    await user.save();
+    return user;
   }
   // Update user to Customer
-  updateToCustomer(id: number): Promise<any> {
-    return this.userRepository.update({ id }, { role: UserRole.CUSTOMER });
+  async updateToCustomer(id: number): Promise<any> {
+    const user = await this.getUserById(id);
+    user.role = UserRole.CUSTOMER;
+    await user.save();
+    return user;
   }
   // update user role manually
-  updateUserRole(id: number, role: UserRole): Promise<any> {
-    return this.userRepository.update({ id }, { role: role });
+  async updateUserRole(id: number, role: UserRole): Promise<any> {
+    const user = await this.getUserById(id);
+    user.role = role;
+    await user.save();
+    return user;
   }
 
   // delete user
-  deleteUser(id: number): Promise<any> {
-    return this.userRepository.delete(id);
+  async deleteUser(id: number): Promise<any> {
+    const user = await this.getUserById(id);
+    await user.remove();
+    return user;
   }
 }
