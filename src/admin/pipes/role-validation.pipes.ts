@@ -1,5 +1,5 @@
 import { BadRequestException, PipeTransform } from '@nestjs/common';
-import { UserRole } from './../model/user.model';
+import { UserRole } from './../enum/user-role.enum';
 
 export class RoleValidationPipe implements PipeTransform {
   readonly allowedRoles = [

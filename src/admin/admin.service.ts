@@ -1,104 +1,114 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import * as uuid from 'uuid';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserFilterDto } from './dto/get-user-filter.dto';
-import { UserRole, Users } from './model/user.model';
+import { UserEntity } from './entity/users.entity';
+import { UserRole } from './enum/user-role.enum';
 
 @Injectable()
 export class AdminService {
-  private user: Users[] = [];
+  constructor(
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+  ) {}
 
   // Create User
-  createUser(createUserDto: CreateUserDto): Users {
+  async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
     const { name, email } = createUserDto;
-    const user: Users = {
-      id: uuid.v1(),
-      name,
-      email,
-      role: UserRole.CUSTOMER,
-    };
-    this.user.push(user);
+
+    const user = new UserEntity();
+    user.name = name;
+    user.email = email;
+    user.role = UserRole.ADMIN;
+    await user.save();
+
     return user;
   }
-
   // get all Users
-  getAllUser(): Users[] {
-    return this.user;
-  }
-  getUserWithFilters(filterDto: GetUserFilterDto): Users[] {
-    const { search, role } = filterDto;
-    let users = this.getAllUser();
-    if (search) {
-      users = users.filter(
-        (user) => user.name.includes(search) || user.email.includes(search),
-      );
-    }
-    if (role) {
-      users = users.filter((user) => user.role === role);
-    }
-    return users;
+  getAllUser(): Promise<UserEntity[]> {
+    return this.userRepository.find();
   }
 
   // get an user by id
-  getUserById(id: string): Users {
-    const found = this.user.find((user) => user.id === id);
+  async getUserById(id: number): Promise<UserEntity> {
+    const found = await this.userRepository.findOneBy({ id });
+
     if (!found) {
       throw new NotFoundException(`User with Id '${id}' not found`);
     }
+
     return found;
   }
 
-  // get only admin
-  getAllAdmin(): Users[] {
-    return this.user.filter((user) => user.role === UserRole.ADMIN);
-  }
-  // get only employee
-  getAllEmployee(): Users[] {
-    return this.user.filter((user) => user.role === UserRole.EMPLOYEE);
-  }
-  // get only seller
-  getAllSeller(): Users[] {
-    return this.user.filter((user) => user.role === UserRole.SELLER);
-  }
-  // get only customer
-  getAllCustomer(): Users[] {
-    return this.user.filter((user) => user.role === UserRole.CUSTOMER);
+  // Get Users
+  async getUsers(filterDto: GetUserFilterDto): Promise<UserEntity[]> {
+    const { search, role } = filterDto;
+    const query = this.userRepository.createQueryBuilder('user');
+
+    if (search) {
+      query.andWhere('(user.name LIKE :search OR user.email LIKE :search)', {
+        search: `%${search}%`,
+      });
+    }
+    if (role) {
+      query.andWhere('user.role = :role', { role });
+    }
+
+    const users = await query.getMany();
+    return users;
   }
 
-  // update user to admin
-  updateToAdmin(id: string): Users {
-    const user = this.getUserById(id);
-    user.role = UserRole.ADMIN;
-    return user;
+  // get only admin
+  getAllAdmin(): Promise<UserEntity[]> {
+    return this.userRepository.find({
+      where: { role: UserRole.ADMIN },
+    });
   }
-  // update user to employee
-  updateToEmployee(id: string): Users {
-    const user = this.getUserById(id);
-    user.role = UserRole.EMPLOYEE;
-    return user;
+
+  // get only employee
+  getAllEmployee(): Promise<UserEntity[]> {
+    return this.userRepository.find({
+      where: { role: UserRole.EMPLOYEE },
+    });
   }
-  // update user to seller
-  updateToSeller(id: string): Users {
-    const user = this.getUserById(id);
-    user.role = UserRole.SELLER;
-    return user;
+  // get only seller
+  getAllSeller(): Promise<UserEntity[]> {
+    return this.userRepository.find({
+      where: { role: UserRole.SELLER },
+    });
   }
-  // update user to customer
-  updateToCustomer(id: string): Users {
-    const user = this.getUserById(id);
-    user.role = UserRole.CUSTOMER;
-    return user;
+  // get only customer
+  getAllCustomer(): Promise<UserEntity[]> {
+    return this.userRepository.find({
+      where: { role: UserRole.CUSTOMER },
+    });
+  }
+
+  // Update user to Admin
+  updateToAdmin(id: number): Promise<any> {
+    return this.userRepository.update({ id }, { role: UserRole.ADMIN });
+  }
+
+  // Update user to Employee
+  updateToEmployee(id: number): Promise<any> {
+    return this.userRepository.update({ id }, { role: UserRole.EMPLOYEE });
+  }
+  // Update user to Seller
+  updateToSeller(id: number): Promise<any> {
+    return this.userRepository.update({ id }, { role: UserRole.SELLER });
+  }
+  // Update user to Customer
+  updateToCustomer(id: number): Promise<any> {
+    return this.userRepository.update({ id }, { role: UserRole.CUSTOMER });
   }
   // update user role manually
-  updateUserRole(id: string, role: UserRole): Users {
-    const user = this.getUserById(id);
-    user.role = role;
-    return user;
+  updateUserRole(id: number, role: UserRole): Promise<any> {
+    return this.userRepository.update({ id }, { role: role });
   }
 
   // delete user
-  deleteUser(id: string): void {
-    const found = this.getUserById(id);
-    this.user = this.user.filter((user) => user.id !== found.id);
+  deleteUser(id: number): Promise<any> {
+    return this.userRepository.delete(id);
   }
 }

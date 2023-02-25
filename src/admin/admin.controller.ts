@@ -1,19 +1,20 @@
+import { Query } from '@nestjs/common';
+import { GetUserFilterDto } from './dto/get-user-filter.dto';
+/* eslint-disable prettier/prettier */
 import {
-  Body,
-  Controller,
-  Delete,
+  Body, Controller, Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
-  Query,
   UsePipes,
-  ValidationPipe,
+  ValidationPipe
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { GetUserFilterDto } from './dto/get-user-filter.dto';
-import { UserRole, Users } from './model/user.model';
+import { UserEntity } from './entity/users.entity';
+import { UserRole } from './enum/user-role.enum';
 import { RoleValidationPipe } from './pipes/role-validation.pipes';
 
 @Controller('/admin')
@@ -23,77 +24,83 @@ export class AdminController {
   // Create User
   @Post('/create-user')
   @UsePipes(ValidationPipe)
-  createUser(@Body() createUserDto: CreateUserDto): Users {
+  createUser(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
     return this.adminService.createUser(createUserDto);
   }
+  
   // Get Users
-  @Get('/all-users')
-  getUser(@Query(ValidationPipe) filterDto: GetUserFilterDto): Users[] {
-    if (Object.keys(filterDto).length) {
-      return this.adminService.getUserWithFilters(filterDto);
-    } else {
-      return this.adminService.getAllUser();
-    }
+  // @Get('/all-users')
+  // getAllUser(): Promise<UserEntity[]> {
+  //   return this.adminService.getAllUser();
+  // }
+  
+
+
+  @Get()   
+  getUser(@Query(ValidationPipe) filterDto: GetUserFilterDto): Promise<UserEntity[]> {
+    return this.adminService.getUsers(filterDto);
+    
   }
+  
   // Get an user by id
   @Get('/user/:id')
-  getUserById(@Param('id') id: string): Users {
+  getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
     return this.adminService.getUserById(id);
   }
 
   // Get all Admin
   @Get('/all-admin')
-  getAdmin(): Users[] {
-    return this.adminService.getAllAdmin();
+  getAdmin(): Promise<UserEntity[]> {
+    return this.adminService.getAllAdmin(); 
   }
   // Get all Employee
   @Get('/all-employee')
-  getEmployee(): Users[] {
+  getEmployee():Promise<UserEntity[]>  {
     return this.adminService.getAllEmployee();
   }
   // Get all Seller
   @Get('/all-seller')
-  getSeller(): Users[] {
+  getSeller():Promise<UserEntity[]>  {
     return this.adminService.getAllSeller();
   }
   // Get all Customer
   @Get('/all-customer')
-  getCustomer(): Users[] {
+  getCustomer():Promise<UserEntity[]>  {
     return this.adminService.getAllCustomer();
   }
 
   // Update user to admin
   @Put('/update-to-admin/:id')
-  updateToAdmin(@Param('id') id: string): Users {
+  updateToAdmin(@Param('id') id: number): Promise<any> {
     return this.adminService.updateToAdmin(id);
   }
   // Update user to employee
   @Put('/update-to-employee/:id')
-  updateToEmployee(@Param('id') id: string): Users {
+  updateToEmployee(@Param('id') id: number): Promise<any> {
     return this.adminService.updateToEmployee(id);
   }
   // Update user to seller
   @Put('/update-to-seller/:id')
-  updateToSeller(@Param('id') id: string): Users {
+  updateToSeller(@Param('id') id: number): Promise<any> {
     return this.adminService.updateToSeller(id);
   }
   // Update user to customer
   @Put('/update-to-customer/:id')
-  updateToCustomer(@Param('id') id: string): Users {
+  updateToCustomer(@Param('id') id: number): Promise<any> {
     return this.adminService.updateToCustomer(id);
   }
   // Update user role manually
   @Put('/update-user-role/:id')
   updateUserRole(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body('role', RoleValidationPipe) role: UserRole,
-  ): Users {
+  ): Promise<any> {
     return this.adminService.updateUserRole(id, role);
   }
 
   // Delete user
   @Delete('/delete-user/:id')
-  deleteUser(@Param('id') id: string): void {
+  deleteUser(@Param('id') id: number): Promise<any> {
     return this.adminService.deleteUser(id);
   }
 }
