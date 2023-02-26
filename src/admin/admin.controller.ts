@@ -2,14 +2,16 @@ import { Query } from '@nestjs/common';
 import { GetUserFilterDto } from './dto/get-user-filter.dto';
 /* eslint-disable prettier/prettier */
 import {
-  Body, Controller, Delete,
+  Body,
+  Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
   Put,
   UsePipes,
-  ValidationPipe
+  ValidationPipe,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,12 +30,13 @@ export class AdminController {
     return this.adminService.createUser(createUserDto);
   }
 
-  @Get()   
-  getUser(@Query(ValidationPipe) filterDto: GetUserFilterDto): Promise<UserEntity[]> {
+  @Get()
+  getUser(
+    @Query(ValidationPipe) filterDto: GetUserFilterDto,
+  ): Promise<UserEntity[]> {
     return this.adminService.getUsers(filterDto);
-    
   }
-  
+
   // Get an user by id
   @Get('/user/:id')
   getUserById(@Param('id', ParseIntPipe) id: number): Promise<UserEntity> {
@@ -43,21 +46,21 @@ export class AdminController {
   // Get all Admin
   @Get('/all-admin')
   getAdmin(): Promise<UserEntity[]> {
-    return this.adminService.getAllAdmin(); 
+    return this.adminService.getAllAdmin();
   }
   // Get all Employee
   @Get('/all-employee')
-  getEmployee():Promise<UserEntity[]>  {
+  getEmployee(): Promise<UserEntity[]> {
     return this.adminService.getAllEmployee();
   }
   // Get all Seller
   @Get('/all-seller')
-  getSeller():Promise<UserEntity[]>  {
+  getSeller(): Promise<UserEntity[]> {
     return this.adminService.getAllSeller();
   }
   // Get all Customer
   @Get('/all-customer')
-  getCustomer():Promise<UserEntity[]>  {
+  getCustomer(): Promise<UserEntity[]> {
     return this.adminService.getAllCustomer();
   }
 
@@ -68,7 +71,7 @@ export class AdminController {
   }
   // Update user to employee
   @Put('/update-to-employee/:id')
-  updateToEmployee(@Param('id', ParseIntPipe ) id: number): Promise<any> {
+  updateToEmployee(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.adminService.updateToEmployee(id);
   }
   // Update user to seller
@@ -84,12 +87,12 @@ export class AdminController {
   // Update user role manually
   @Put('/update-user-role/:id')
   updateUserRole(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body('role', RoleValidationPipe) role: UserRole,
   ): Promise<any> {
     return this.adminService.updateUserRole(id, role);
   }
-  
+
   // Delete user
   @Delete('/delete-user/:id')
   deleteUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
