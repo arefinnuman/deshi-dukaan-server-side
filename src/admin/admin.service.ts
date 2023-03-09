@@ -53,18 +53,15 @@ export class AdminService {
   async getAdmins(filterDto: GetUserFilterDto): Promise<Admins[]> {
     const { search, role } = filterDto;
     const query = this.adminRepository.createQueryBuilder('admin');
-
     if (role) {
       query.andWhere('admin.role = :role', { role });
     }
-
     if (search) {
       query.andWhere(
         '(admin.firstname LIKE :search OR admin.lastname LIKE :search OR admin.email LIKE :search)',
         { search: `%${search}%` },
       );
     }
-
     const admins = await query.getMany();
     return admins;
   }
@@ -157,6 +154,23 @@ export class AdminService {
     const employee = await this.getEmployeeById(id);
     await employee.remove();
     return employee;
+  }
+
+  // Admin make an Employee to Admin
+  async updateToAdmin(id: number): Promise<any> {
+    const employee = await this.getEmployeeById(id);
+    const admin = new Admins();
+    admin.email = employee.email;
+    admin.password = employee.password;
+    admin.username = employee.username;
+    admin.firstname = employee.firstname;
+    admin.lastname = employee.lastname;
+    admin.address = employee.address;
+    admin.phone = employee.phone;
+    admin.role = UserRole.ADMIN;
+    await admin.save();
+    await employee.remove();
+    return admin;
   }
 
   //----------------------------------------------------//
