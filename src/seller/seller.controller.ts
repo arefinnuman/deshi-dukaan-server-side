@@ -1,7 +1,9 @@
+/* eslint-disable prettier/prettier */
+
 import { ParseIntPipe } from '@nestjs/common';
 import { ProductCategory } from './enum/product-category.enum';
 import { CategoryValidationPipe } from './pipes/category-validation.pipes';
-/* eslint-disable prettier/prettier */
+
 import {
   Body,
   Controller,
@@ -14,7 +16,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductEntity } from './entity/product.entity';
+import { Products } from './entity/product.entity';
 import { SellerService } from './seller.service';
 
 @Controller('seller')
@@ -33,14 +35,12 @@ export class SellerController {
 
   //  Get ALl Products
   @Get('products')
-  getProduct(): Promise<ProductEntity[]> {
+  getProduct(): Promise<Products[]> {
     return this.sellerService.getAllProduct();
   }
   // Get Products by ID
   @Get('product/:id')
-  getProductById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<ProductEntity> {
+  getProductById(@Param('id', ParseIntPipe) id: number): Promise<Products> {
     return this.sellerService.getProductById(id);
   }
 
@@ -70,7 +70,7 @@ export class SellerController {
 
   //   Delete Product
   @Delete('/delete-product/:id')
-  deleteProduct(@Param('id', ParseIntPipe) id: number): Promise<ProductEntity> {
+  deleteProduct(@Param('id', ParseIntPipe) id: number): Promise<Products> {
     return this.sellerService.deleteProduct(id);
   }
 }

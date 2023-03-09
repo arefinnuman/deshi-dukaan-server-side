@@ -2,17 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
-import { ProductEntity } from './entity/product.entity';
-import { SellerEntity } from './entity/seller.entity';
+import { Products } from './entity/product.entity';
+import { Seller } from './entity/seller.entity';
 import { ProductCategory } from './enum/product-category.enum';
 
 @Injectable()
 export class SellerService {
   constructor(
-    @InjectRepository(ProductEntity)
-    private productRepository: Repository<ProductEntity>,
-    @InjectRepository(SellerEntity)
-    private sellerRepository: Repository<SellerEntity>,
+    @InjectRepository(Products)
+    private productRepository: Repository<Products>,
+    @InjectRepository(Seller)
+    private sellerRepository: Repository<Seller>,
   ) {}
 
   //   Create a Product Post
@@ -22,7 +22,7 @@ export class SellerService {
   ) {
     const { productName, price, description, image, quantity } =
       createProductDto;
-    const product = new ProductEntity();
+    const product = new Products();
     product.productName = productName;
     product.price = price;
     product.description = description;
@@ -34,11 +34,11 @@ export class SellerService {
     return product;
   }
   //   View All Product
-  getAllProduct(): Promise<ProductEntity[]> {
+  getAllProduct(): Promise<Products[]> {
     return this.productRepository.find();
   }
   //   Find a Product by id
-  async getProductById(id: number): Promise<ProductEntity> {
+  async getProductById(id: number): Promise<Products> {
     const found = await this.productRepository.findOneBy({ id });
 
     if (!found) {

@@ -6,7 +6,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   port: 4444,
   username: 'postgres',
   password: 'postgres',
-  database: 'usermanagement',
+  database: 'deshi_dukan_server',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
   synchronize: true,
 };
