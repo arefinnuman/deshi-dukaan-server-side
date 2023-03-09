@@ -14,6 +14,7 @@ export class RoleValidationPipe implements PipeTransform {
     if (!this.isRoleValid(value)) {
       throw new BadRequestException(
         `'${value}' is an invalid role, Please give a valid role`,
+        // Comment the below line to get the error message in the response body
       );
     }
     return value;
