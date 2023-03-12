@@ -5,7 +5,9 @@ export const saveUploadedFile = {
     destination: './uploads',
     filename: (req, file, cb) => {
       const ext = file.originalname.split('.').pop();
-      const fileName = `${Date.now()}_${Math.round(Math.random() * 1e6)}.${ext}`;
+      const fileName = `${Date.now()}_${Math.round(
+        Math.random() * 1e6,
+      )}.${ext}`;
       cb(null, fileName);
     },
   }),

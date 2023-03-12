@@ -14,6 +14,9 @@ export class Payment {
   orders: Order[];
 
   // Payment has many CustomerPayments
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.payment)
+  @OneToMany(
+    () => CustomerPayment,
+    (customerPayment) => customerPayment.payment,
+  )
   customerPayments: CustomerPayment[];
 }

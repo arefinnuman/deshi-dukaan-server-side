@@ -14,7 +14,10 @@ export class SellerService {
 
   async registerAccount(sellerRegisterDto) {
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(sellerRegisterDto.S_Password, salt);
+    const hashedPassword = await bcrypt.hash(
+      sellerRegisterDto.S_Password,
+      salt,
+    );
     sellerRegisterDto.S_Password = hashedPassword;
     sellerRegisterDto.S_CreatedAt = new Date();
     sellerRegisterDto.S_ModifiedAt = new Date();
@@ -70,12 +73,4 @@ export class SellerService {
     updateSellerDto.S_ModifiedAt = new Date();
     return await this.sellerRepo.update(id, updateSellerDto);
   }
-
-  // Seller can view her/his own orders
-  // async viewOrders(id) {
-  //   return await this.sellerRepo.findOne(id, { relations: ['orders'] });
-  // }
-
-  // Seller can view her/his own order
-  // async viewOrder(id) {
 }

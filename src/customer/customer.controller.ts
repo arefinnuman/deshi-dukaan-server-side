@@ -33,7 +33,9 @@ export class CustomerController {
   constructor(private customerService: CustomerService) {}
 
   @Post('/register')
-  registerAccount(@Body(ValidationPipe) customerRegisterDto: CustomerRegisterDto) {
+  registerAccount(
+    @Body(ValidationPipe) customerRegisterDto: CustomerRegisterDto,
+  ) {
     return this.customerService.registerAccount(customerRegisterDto);
   }
   @Get('/verify-email/')
@@ -73,7 +75,9 @@ export class CustomerController {
   }
 
   @Post('/forgot-password')
-  forgotPassword(@Body(ValidationPipe) customerForgotPassDto: CustomerForgotPassDto) {
+  forgotPassword(
+    @Body(ValidationPipe) customerForgotPassDto: CustomerForgotPassDto,
+  ) {
     return this.customerService.forgotPassword(customerForgotPassDto);
   }
   // @Post('/verify-otp')
@@ -109,7 +113,10 @@ export class CustomerController {
   }
 
   @Post('/create-order/:id')
-  createOrder(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) createOrderDto: CreateOrderDto) {
+  createOrder(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(ValidationPipe) createOrderDto: CreateOrderDto,
+  ) {
     return this.customerService.createOrder(id, createOrderDto);
   }
   @Get('/order/:id')
@@ -153,7 +160,10 @@ export class CustomerController {
   }
 
   @Post('/login')
-  async login(@Session() session, @Body(ValidationPipe) customerLoginDto: CustomerLoginDto) {
+  async login(
+    @Session() session,
+    @Body(ValidationPipe) customerLoginDto: CustomerLoginDto,
+  ) {
     const isValid = await this.customerService.login(customerLoginDto);
     if (isValid) {
       session.email = customerLoginDto.C_Email;

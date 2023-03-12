@@ -22,6 +22,7 @@ import { saveUploadedFile } from './../helper/saveUploadedFile';
 import { AdminService } from './admin.service';
 import { AdminChangePassDto } from './dto/adminChangePassDto';
 import { AdminSignInDto } from './dto/adminSignInDto';
+
 import { AdminUpdateDto } from './dto/adminUpdateDto';
 import { CreateAdminDto } from './dto/createAdminDto';
 import { CreatePaymentDto } from './dto/createPayment.Dto';
@@ -38,7 +39,10 @@ export class AdminController {
   }
   // Sign-in
   @Post('sign-in')
-  async signIn(@Session() session, @Body(ValidationPipe) adminSignInDto: AdminSignInDto) {
+  async signIn(
+    @Session() session,
+    @Body(ValidationPipe) adminSignInDto: AdminSignInDto,
+  ) {
     const found = await this.adminService.signIn(adminSignInDto);
     if (found) {
       session.A_Email = adminSignInDto.A_Email;
@@ -101,7 +105,10 @@ export class AdminController {
   }
   //   Change Password
   @Patch('/change-password/:id')
-  changePassword(@Param('id', ParseIntPipe) id: number, @Body(ValidationPipe) adminChangePassDto: AdminChangePassDto) {
+  changePassword(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(ValidationPipe) adminChangePassDto: AdminChangePassDto,
+  ) {
     return this.adminService.changePassword(id, adminChangePassDto);
   }
   //   Delete Admin

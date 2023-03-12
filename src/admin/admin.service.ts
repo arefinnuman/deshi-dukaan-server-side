@@ -1,5 +1,9 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Admin } from 'src/db/entity/admin.entity';
@@ -56,7 +60,9 @@ export class AdminService {
 
   //   Admin Can Create another Admin
   async createAdmin(createAdminDto) {
-    const existAdmin = await this.adminRepository.findOneBy({ A_Email: createAdminDto.A_Email });
+    const existAdmin = await this.adminRepository.findOneBy({
+      A_Email: createAdminDto.A_Email,
+    });
     if (existAdmin) {
       throw new NotFoundException('Admin Already Exist');
     } else {
@@ -107,13 +113,24 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
   //   Change Password
   async changePassword(id, adminChangePassDto) {
-    const dbPassword = await (await this.adminRepository.findOneBy({ A_Id: id })).A_Password;
-    const isMatch = await bcrypt.compare(adminChangePassDto.A_CurrentPassword, dbPassword);
+    const dbPassword = await (
+      await this.adminRepository.findOneBy({ A_Id: id })
+    ).A_Password;
+    const isMatch = await bcrypt.compare(
+      adminChangePassDto.A_CurrentPassword,
+      dbPassword,
+    );
     if (isMatch) {
       const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(adminChangePassDto.A_NewPassword, salt);
+      const hashedPassword = await bcrypt.hash(
+        adminChangePassDto.A_NewPassword,
+        salt,
+      );
       adminChangePassDto.A_NewPassword = hashedPassword;
-      return await this.adminRepository.update({ A_Id: id }, { A_Password: adminChangePassDto.A_NewPassword });
+      return await this.adminRepository.update(
+        { A_Id: id },
+        { A_Password: adminChangePassDto.A_NewPassword },
+      );
     } else {
       return 'Password not match';
     }

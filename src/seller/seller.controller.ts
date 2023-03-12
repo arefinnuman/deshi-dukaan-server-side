@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Session, UnauthorizedException, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Session,
+  UnauthorizedException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/createProduct.dto';
 import { SellerSignInDto } from './dto/sellerSignInDto';
 import { SellerRegisterDto } from './dto/sRegister.dto';
@@ -16,7 +25,10 @@ export class SellerController {
 
   //  Seller can sign in
   @Post('sign-in')
-  async signIn(@Session() session, @Body(ValidationPipe) sellerSignInDto: SellerSignInDto) {
+  async signIn(
+    @Session() session,
+    @Body(ValidationPipe) sellerSignInDto: SellerSignInDto,
+  ) {
     const found = await this.sellerService.signIn(sellerSignInDto);
     if (found) {
       session.S_Email = sellerSignInDto.S_Email;
@@ -39,7 +51,10 @@ export class SellerController {
 
   // Seller can create product
   @Post('/create-product/:id')
-  createProduct(@Param('id') id: number, @Body(ValidationPipe) createProductDto: CreateProductDto) {
+  createProduct(
+    @Param('id') id: number,
+    @Body(ValidationPipe) createProductDto: CreateProductDto,
+  ) {
     return this.sellerService.createProduct(id, createProductDto);
   }
 
@@ -69,8 +84,10 @@ export class SellerController {
 
   // Seller can update her/his profile
   @Post('/update-profile/:id')
-  async updateProfile(@Param('id') id: number, @Body(ValidationPipe) sellerRegisterDto: SellerRegisterDto) {
+  async updateProfile(
+    @Param('id') id: number,
+    @Body(ValidationPipe) sellerRegisterDto: SellerRegisterDto,
+  ) {
     return await this.sellerService.updateProfile(id, sellerRegisterDto);
   }
-  
 }

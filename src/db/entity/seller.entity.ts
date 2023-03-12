@@ -1,4 +1,10 @@
-import { Column, Entity, Generated, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Generated,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Product } from './product.entity';
 @Entity('Sellers')
 export class Seller {
@@ -41,7 +47,7 @@ export class Seller {
 
   @Column()
   S_Status: string;
-  
+
   @Column()
   Role: string;
 

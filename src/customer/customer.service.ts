@@ -17,20 +17,27 @@ export class CustomerService {
     @InjectRepository(Customer) private customerRepo: Repository<Customer>,
     @InjectRepository(Product) private productRepo: Repository<Product>,
     @InjectRepository(Order) private orderRepo: Repository<Order>,
-    @InjectRepository(OrderDetail) private orderDetailRepo: Repository<OrderDetail>,
+    @InjectRepository(OrderDetail)
+    private orderDetailRepo: Repository<OrderDetail>,
     @InjectRepository(Payment) private paymentRepo: Repository<Payment>,
-    @InjectRepository(CustomerPayment) private customerPaymentRepo: Repository<CustomerPayment>,
+    @InjectRepository(CustomerPayment)
+    private customerPaymentRepo: Repository<CustomerPayment>,
     @InjectRepository(Review) private reviewRepo: Repository<Review>,
     private mailerService: MailerService,
   ) {}
   // Customer Register
   async registerAccount(customerRegisterDto) {
-    const dbCustomer = await this.customerRepo.findOneBy({ C_Email: customerRegisterDto.C_Email });
+    const dbCustomer = await this.customerRepo.findOneBy({
+      C_Email: customerRegisterDto.C_Email,
+    });
     if (dbCustomer) {
       return { message: 'Email already exists' };
     } else {
       const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(customerRegisterDto.C_Password, salt);
+      const hashedPassword = await bcrypt.hash(
+        customerRegisterDto.C_Password,
+        salt,
+      );
       customerRegisterDto.C_Password = hashedPassword;
       customerRegisterDto.C_CreatedAt = new Date();
       customerRegisterDto.C_ModifiedAt = new Date();
@@ -70,20 +77,32 @@ http://localhost:3000/customer/verify-email/?uid=${customerRegisterDto.C_Uuid}`,
   }
   // Customer Change Password
   async changePassword(id, customerChangePassDto) {
-    const dbPassword = (await this.customerRepo.findOneBy({ C_Id: id })).C_Password;
-    const isMatch = await bcrypt.compare(customerChangePassDto.C_CurrentPassword, dbPassword);
+    const dbPassword = (await this.customerRepo.findOneBy({ C_Id: id }))
+      .C_Password;
+    const isMatch = await bcrypt.compare(
+      customerChangePassDto.C_CurrentPassword,
+      dbPassword,
+    );
     if (isMatch) {
       const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(customerChangePassDto.C_NewPassword, salt);
+      const hashedPassword = await bcrypt.hash(
+        customerChangePassDto.C_NewPassword,
+        salt,
+      );
       customerChangePassDto.C_NewPassword = hashedPassword;
-      return await this.customerRepo.update({ C_Id: id }, { C_Password: customerChangePassDto.C_NewPassword });
+      return await this.customerRepo.update(
+        { C_Id: id },
+        { C_Password: customerChangePassDto.C_NewPassword },
+      );
     } else {
       return { message: 'Invalid Password' };
     }
   }
   // Customer Forgot Password
   async forgotPassword(customerForgotPassDto) {
-    const validCustomer = await this.customerRepo.findOneBy({ C_Email: customerForgotPassDto.C_Email });
+    const validCustomer = await this.customerRepo.findOneBy({
+      C_Email: customerForgotPassDto.C_Email,
+    });
     if (validCustomer) {
       const otp = Math.round(100000 + Math.random() * 900000);
       await this.mailerService.sendMail({
@@ -126,7 +145,8 @@ http://localhost:3000/customer/verify-email/?uid=${customerRegisterDto.C_Uuid}`,
   // Customer can create order
   async createOrder(id, createOrderDto) {
     createOrderDto.OrderCode =
-      Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
     createOrderDto.OrderStatus = 'Pending';
     createOrderDto.OrderPlacedDate = new Date();
     createOrderDto.OrderDeliveredDate = new Date();
@@ -135,11 +155,15 @@ http://localhost:3000/customer/verify-email/?uid=${customerRegisterDto.C_Uuid}`,
     const order = await this.orderRepo.save(createOrderDto);
     for (let i = 0; i < createOrderDto.orderDetails.length; i++) {
       createOrderDto.orderDetails[i].order = order;
-      const orderDetailAmount = createOrderDto.orderDetails[i].P_OrderQty * createOrderDto.orderDetails[i].P_OrderPrice;
+      const orderDetailAmount =
+        createOrderDto.orderDetails[i].P_OrderQty *
+        createOrderDto.orderDetails[i].P_OrderPrice;
       createOrderDto.OrderAmount += orderDetailAmount;
       await this.orderDetailRepo.save(createOrderDto.orderDetails[i]);
     }
-    await this.orderRepo.update(order.OrderId, { OrderAmount: createOrderDto.OrderAmount });
+    await this.orderRepo.update(order.OrderId, {
+      OrderAmount: createOrderDto.OrderAmount,
+    });
     return order;
   }
 
@@ -150,7 +174,9 @@ http://localhost:3000/customer/verify-email/?uid=${customerRegisterDto.C_Uuid}`,
 
   // Customer can view own order details
   async viewOrderDetail(orderCode) {
-    const orderId: any = (await this.orderRepo.findOneBy({ OrderCode: orderCode })).OrderId;
+    const orderId: any = (
+      await this.orderRepo.findOneBy({ OrderCode: orderCode })
+    ).OrderId;
     return await this.orderDetailRepo.findOneBy({ order: orderId });
   }
   // Customer can view payment options
@@ -180,8 +206,16 @@ http://localhost:3000/customer/verify-email/?uid=${customerRegisterDto.C_Uuid}`,
   }
 
   async login(customerLoginDto) {
-    const isValidCustomer = await await this.customerRepo.findOneBy({ C_Email: customerLoginDto.C_Email });
-    if (isValidCustomer && (await bcrypt.compare(customerLoginDto.C_Password, isValidCustomer.C_Password))) {
+    const isValidCustomer = await await this.customerRepo.findOneBy({
+      C_Email: customerLoginDto.C_Email,
+    });
+    if (
+      isValidCustomer &&
+      (await bcrypt.compare(
+        customerLoginDto.C_Password,
+        isValidCustomer.C_Password,
+      ))
+    ) {
       return 1;
     } else {
       throw new UnauthorizedException('Invalid credentials');
