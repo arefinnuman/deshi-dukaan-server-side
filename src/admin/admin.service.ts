@@ -1,237 +1,207 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { MailerService } from '@nestjs-modules/mailer';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
+import { Admin } from 'src/db/entity/admin.entity';
+import { Order } from 'src/db/entity/order.entity';
+import { Payment } from 'src/db/entity/payment.entity';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { GetUserFilterDto } from './dto/get-user-filter.dto';
-import { Admins } from './entity/admin.entity';
-import { Employees } from './entity/employees.entity';
-import { UserRole } from './enum/user-role.enum';
+import { Customer } from './../db/entity/customer.entity';
+import { Product } from './../db/entity/product.entity';
+import { Review } from './../db/entity/review.entity';
+import { Seller } from './../db/entity/seller.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(Admins)
-    private adminRepository: Repository<Admins>,
+    @InjectRepository(Admin)
+    private adminRepository: Repository<Admin>,
 
-    @InjectRepository(Employees)
-    private employeeRepository: Repository<Employees>,
+    @InjectRepository(Seller)
+    private sellerRepository: Repository<Seller>,
+
+    @InjectRepository(Customer)
+    private customerRepository: Repository<Customer>,
+
+    @InjectRepository(Order)
+    private orderRepository: Repository<Order>,
+
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
+
+    @InjectRepository(Review)
+    private reviewRepository: Repository<Review>,
+
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
+
+    private mailerService: MailerService,
   ) {}
 
-  // This is the service for code, which is in the controller
+  // Admin Can Sign-up and Sign in
+  // Sign-up can be dome using createAdmin method
 
-  // Admin create , get all admin, get admin by id, delete admin, search admin by name or email
-  // Admin can create an Admin
-  async createAdmin(createUserDto: CreateUserDto): Promise<Admins> {
-    const { email, password, username, firstname, lastname, address, phone } =
-      createUserDto;
-    const user = new Admins();
-    user.email = email;
-    user.password = password;
-    user.username = username;
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.address = address;
-    user.phone = phone;
-    user.role = UserRole.ADMIN;
-    await user.save();
-
-    return user;
-  }
-  // get an Admin by id
-  async getAdminById(id: number): Promise<Admins> {
-    const found = await this.adminRepository.findOneBy({ id });
-    if (!found) {
-      throw new NotFoundException(`User with Id '${id}' not found`);
+  // Sign-in
+  async signIn(adminSignInDto) {
+    const { A_Email, A_Password } = adminSignInDto;
+    const user = await this.adminRepository.findOneBy({ A_Email });
+    if (user && (await bcrypt.compare(A_Password, user.A_Password))) {
+      return user;
+    } else {
+      throw new UnauthorizedException('Enter Valid Credentials');
     }
-    return found;
-  }
-  // Get all admin
-  getAllAdmin(): Promise<Admins[]> {
-    return this.adminRepository.find();
-  }
-  // Search Admin by name or email
-  async getAdmins(filterDto: GetUserFilterDto): Promise<Admins[]> {
-    const { search, role } = filterDto;
-    const query = this.adminRepository.createQueryBuilder('admin');
-    if (role) {
-      query.andWhere('admin.role = :role', { role });
-    }
-    if (search) {
-      query.andWhere(
-        '(admin.firstname LIKE :search OR admin.lastname LIKE :search OR admin.email LIKE :search)',
-        { search: `%${search}%` },
-      );
-    }
-    const admins = await query.getMany();
-    return admins;
-  }
-  // Edit admin information by id
-  async updateAdmin(id: number, createUserDto: CreateUserDto): Promise<Admins> {
-    const { email, password, username, firstname, lastname, address, phone } =
-      createUserDto;
-    const user = await this.getAdminById(id);
-    user.email = email;
-    user.password = password;
-    user.username = username;
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.address = address;
-    user.phone = phone;
-    await user.save();
-    return user;
-  }
-  // Delete an Admin
-  async deleteAdmin(id: number): Promise<any> {
-    const admin = await this.getAdminById(id);
-    await admin.remove();
-    return admin;
   }
 
-  // Employee create , get all employee, get employee by id, delete employee, search employee by name or email
-  // Admin can create an Employee
-  async createUser(createUserDto: CreateUserDto): Promise<Employees> {
-    const { email, password, username, firstname, lastname, address, phone } =
-      createUserDto;
-    const user = new Employees();
-    user.email = email;
-    user.password = password;
-    user.username = username;
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.address = address;
-    user.phone = phone;
-    user.role = UserRole.EMPLOYEE;
-    await user.save();
-    return user;
-  }
-  // get an Employee by id
-  async getEmployeeById(id: number): Promise<Employees> {
-    const found = await this.employeeRepository.findOneBy({ id });
-    if (!found) {
-      throw new NotFoundException(`User with Id '${id}' not found`);
-    }
-    return found;
-  }
-  // get all Employees
-  getAllEmployee(): Promise<Employees[]> {
-    return this.employeeRepository.find();
-  }
-  // Search Employees by name or email
-  async getEmployees(filterDto: GetUserFilterDto): Promise<Employees[]> {
-    const { search, role } = filterDto;
-    const query = this.employeeRepository.createQueryBuilder('user');
-    if (search) {
-      query.andWhere('(user.name LIKE :search OR user.email LIKE :search)', {
-        search: `%${search}%`,
+  // ------------------ Admin------------------//
+
+  //   Admin Can Create another Admin
+  async createAdmin(createAdminDto) {
+    const existAdmin = await this.adminRepository.findOneBy({ A_Email: createAdminDto.A_Email });
+    if (existAdmin) {
+      throw new NotFoundException('Admin Already Exist');
+    } else {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(createAdminDto.A_Password, salt);
+      createAdminDto.A_Password = hashedPassword;
+      createAdminDto.Role = 'Admin';
+      createAdminDto.A_CreatedAt = new Date();
+      createAdminDto.A_ModifiedAt = new Date();
+      const admin = await this.adminRepository.save(createAdminDto);
+      this.mailerService.sendMail({
+        to: createAdminDto.A_Email,
+        subject: 'Welcome to DesiDukaan',
+        text: `Hi, ${createAdminDto.A_Name}. Welcome to DesiDukaan.
+Please verify your email address by clicking on the link below.
+http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
       });
+      return admin;
     }
-    if (role) {
-      query.andWhere('user.role = :role', { role });
+  }
+  // Admin verify email
+  async verifyEmail(uuid) {
+    await this.adminRepository.update({ A_Uuid: uuid }, { A_Verified: true });
+    const verifiedUser = await this.adminRepository.findOneBy({ A_Uuid: uuid });
+    if (verifiedUser) {
+      return { message: 'Email verified successfully' };
+    } else {
+      return { message: 'Email verification failed' };
     }
-    const employees = await query.getMany();
-    return employees;
-  }
-  // Edit Employee Information by id
-  async editEmployee(
-    id: number,
-    CreateUserDto: CreateUserDto,
-  ): Promise<Employees> {
-    const { email, password, username, firstname, lastname, address, phone } =
-      CreateUserDto;
-    const user = await this.getEmployeeById(id);
-    user.email = email;
-    user.password = password;
-    user.username = username;
-    user.firstname = firstname;
-    user.lastname = lastname;
-    user.address = address;
-    user.phone = phone;
-    await user.save();
-    return user;
-  }
-  // delete Employee
-  async deleteEmployee(id: number): Promise<any> {
-    const employee = await this.getEmployeeById(id);
-    await employee.remove();
-    return employee;
   }
 
-  // Admin make an Employee to Admin
-  async updateToAdmin(id: number): Promise<any> {
-    const employee = await this.getEmployeeById(id);
-    const admin = new Admins();
-    admin.email = employee.email;
-    admin.password = employee.password;
-    admin.username = employee.username;
-    admin.firstname = employee.firstname;
-    admin.lastname = employee.lastname;
-    admin.address = employee.address;
-    admin.phone = employee.phone;
-    admin.role = UserRole.ADMIN;
-    await admin.save();
-    await employee.remove();
-    return admin;
+  // Get admin by UUId
+  async getAdminById(uuid) {
+    const found = await this.adminRepository.findOneBy({ A_Uuid: uuid });
+    if (!found) {
+      throw new NotFoundException(`Admin with UUId ${uuid} not found`);
+    }
+    return found;
+  }
+  // Gell All Admins
+  async getAllAdmins() {
+    return await this.adminRepository.find();
+  }
+  // Customer Update Profile
+  async updateProfile(id, adminUpdateDto) {
+    adminUpdateDto.A_ModifiedAt = new Date();
+    return await this.adminRepository.update(id, adminUpdateDto);
+  }
+  //   Change Password
+  async changePassword(id, adminChangePassDto) {
+    const dbPassword = await (await this.adminRepository.findOneBy({ A_Id: id })).A_Password;
+    const isMatch = await bcrypt.compare(adminChangePassDto.A_CurrentPassword, dbPassword);
+    if (isMatch) {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(adminChangePassDto.A_NewPassword, salt);
+      adminChangePassDto.A_NewPassword = hashedPassword;
+      return await this.adminRepository.update({ A_Id: id }, { A_Password: adminChangePassDto.A_NewPassword });
+    } else {
+      return 'Password not match';
+    }
+  }
+  //   Admin can delete admin
+  async deleteAdmin(id) {
+    return await this.adminRepository.delete(id);
   }
 
-  //----------------------------------------------------//
+  // ------------------ Admin have some seller functionality------------------//
 
-  // get only employee
-  // getAllEmployee(): Promise<Employees[]> {
-  //   return this.employeeRepository.find({
-  //     where: { role: UserRole.EMPLOYEE },
-  //   });
+  // Admin can view All Sellers Information
+  async getAllSellers() {
+    return await this.sellerRepository.find();
+  }
+  //   Admin can view Seller Information by id
+  async getSellerById(uuid) {
+    const found = await this.sellerRepository.findOneBy({ S_Uuid: uuid });
+    if (!found) {
+      throw new NotFoundException(`Seller with UUId ${uuid} not found`);
+    }
+    return found;
+  }
+  //   Admin can delete seller
+  async deleteSeller(id) {
+    return await this.sellerRepository.delete(id);
+  }
+
+  // ------------------ Admin have some customer functionality------------------//
+
+  //  Admin can view All Customers Information
+  async getAllCustomers() {
+    return await this.customerRepository.find();
+  }
+  //   Admin can view Customer Information by id
+  async getCustomerById(uuid) {
+    const found = await this.customerRepository.findOneBy({ C_Uuid: uuid });
+    if (!found) {
+      throw new NotFoundException(`Customer with UUId ${uuid} not found`);
+    }
+    return found;
+  }
+  //   Admin can delete customer
+  async deleteCustomer(id) {
+    return await this.customerRepository.delete(id);
+  }
+
+  // ------------------ Admin have some Payment functionality------------------//
+  //   Admin can create payment type
+  async createPaymentType(createPaymentDto) {
+    return await this.paymentRepository.save(createPaymentDto);
+  }
+  //   Admin can view All Payment Types
+  async getAllPaymentTypes() {
+    return await this.paymentRepository.find();
+  }
+  //   Admin can view Delelte Payment Type by id
+  async deletePaymentType(id) {
+    return await this.paymentRepository.delete(id);
+  }
+
+  // ------------------ Admin have some order functionality------------------//
+  //   View All orders
+  async getAllOrders() {
+    return await this.orderRepository.find();
+  }
+  //  View order by id
+  async getOrderById(id) {
+    return await this.orderRepository.findOne(id);
+  }
+  //  View order by customer id
+  // async getOrderByCustomerId(id) {
+  //   return await this.orderRepository.find({ where: { O_CustomerId: id } });
   // }
-  // get only admin
-  // getAllAdmin(): Promise<Employees[]> {
-  //   return this.employeeRepository.find({
-  //     where: { role: UserRole.ADMIN },
-  //   });
-  // }
-  // get only seller
-  // getAllSeller(): Promise<Employees[]> {
-  //   return this.employeeRepository.find({
-  //     where: { role: UserRole.SELLER },
-  //   });
-  // }
-  // get only customer
-  // getAllCustomer(): Promise<Employees[]> {
-  //   return this.employeeRepository.find({
-  //     where: { role: UserRole.CUSTOMER },
-  //   });
-  // }
-  // Update user to Admin
-  // async updateToAdmin(id: number): Promise<any> {
-  //   const user = await this.getEmployeeById(id);
-  //   user.role = UserRole.ADMIN;
-  //   await user.save();
-  //   return user;
-  // }
-  // Update user to Employee
-  // async updateToEmployee(id: number): Promise<any> {
-  //   const user = await this.getUserById(id);
-  //   user.role = UserRole.EMPLOYEE;
-  //   await user.save();
-  //   return user;
-  // }
-  // Update user to Seller
-  // async updateToSeller(id: number): Promise<any> {
-  //   const user = await this.getUserById(id);
-  //   user.role = UserRole.SELLER;
-  //   await user.save();
-  //   return user;
-  // }
-  // Update user to Customer
-  // async updateToCustomer(id: number): Promise<any> {
-  //   const user = await this.getUserById(id);
-  //   user.role = UserRole.CUSTOMER;
-  //   await user.save();
-  //   return user;
-  // }
-  // update user role manually
-  // async updateUserRole(id: number, role: UserRole): Promise<any> {
-  //   const user = await this.getUserBy(id);
-  //   user.role = role;
-  //   await user.save();
-  //   return user;
-  // }
+
+  // ------------------ Admin have some product functionality------------------//
+
+  //   View All Products
+  async getAllProducts() {
+    return await this.productRepository.find();
+  }
+
+  // ------------------ Admin have some review functionality------------------//
+
+  // View All Reviews
+  async getAllReviews() {
+    return await this.reviewRepository.find();
+  }
+
+  // Forgot Password
 }

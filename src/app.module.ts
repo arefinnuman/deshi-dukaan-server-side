@@ -1,20 +1,25 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
-import { AuthModule } from './auth/auth.module';
-import { typeOrmConfig } from './config/typeorm.config';
 import { CustomerModule } from './customer/customer.module';
-import { EmployeeModule } from './employee/employee.module';
-import { SellerModule } from './seller/seller.module';
-
+import { DbModule } from './db/db.module';
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
-    AuthModule,
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 4444,
+      username: 'postgres',
+      password: 'postgress',
+      database: 'deshi_dukaan_db',
+      autoLoadEntities: true,
+      synchronize: true,
+    }),
+    DbModule,
     AdminModule,
-    EmployeeModule,
-    SellerModule,
     CustomerModule,
   ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

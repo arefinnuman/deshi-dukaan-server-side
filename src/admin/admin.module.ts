@@ -1,13 +1,26 @@
+import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { DbModule } from 'src/db/db.module';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
-import { Admins } from './entity/admin.entity';
-import { Employees } from './entity/employees.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Employees, Admins])],
-  providers: [AdminService],
+  imports: [
+    DbModule,
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        ignoreTLS: true,
+        secure: true,
+        auth: {
+          user: 'desidukaan.official@gmail.com',
+          pass: 'cetwodmgagbcxmwp',
+        },
+      },
+    }),
+  ],
   controllers: [AdminController],
+  providers: [AdminService],
 })
 export class AdminModule {}
