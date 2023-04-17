@@ -17,15 +17,16 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { saveUploadedFile } from './../helper/saveUploadedFile';
 
+import { saveUploadedFile } from './../helper/saveUploadedFile';
 import { AdminService } from './admin.service';
 import { AdminChangePassDto } from './dto/adminChangePassDto';
 import { AdminSignInDto } from './dto/adminSignInDto';
-
 import { AdminUpdateDto } from './dto/adminUpdateDto';
 import { CreateAdminDto } from './dto/createAdminDto';
+import { CreateCategoryDto } from './dto/createCategory.Dto';
 import { CreatePaymentDto } from './dto/createPayment.Dto';
+import { CreateSellerDto } from './dto/createSellerDto';
 
 @Controller('/admin')
 export class AdminController {
@@ -68,11 +69,6 @@ export class AdminController {
   }
 
   // ------------------ Admin------------------//
-  // Create Admin
-  @Post('/create-admin')
-  async createAdmin(@Body(ValidationPipe) createAdminDto: CreateAdminDto) {
-    return await this.adminService.createAdmin(createAdminDto);
-  }
   //   Get Admin by Id
   @Get('/admin/:id')
   async getAdminById(@Param('id', ParseUUIDPipe) uuid) {
@@ -103,6 +99,7 @@ export class AdminController {
       return this.adminService.updateProfile(id, adminUpdateDto);
     }
   }
+
   //   Change Password
   @Patch('/change-password/:id')
   changePassword(
@@ -111,6 +108,7 @@ export class AdminController {
   ) {
     return this.adminService.changePassword(id, adminChangePassDto);
   }
+
   //   Delete Admin
   @Delete('/delete-admin/:id')
   async deleteAdmin(@Param('id', ParseIntPipe) id: number) {
@@ -118,6 +116,15 @@ export class AdminController {
   }
 
   // ------------------ Admin have some seller functionality------------------//
+
+  // Admin can create seller
+  @Post('/create-seller/:id')
+  async createSeller(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(ValidationPipe) createSellerDto: CreateSellerDto,
+  ) {
+    return await this.adminService.createSeller(id, createSellerDto);
+  }
 
   //   Get All Sellers
   @Get('/sellers')
@@ -152,12 +159,18 @@ export class AdminController {
     return await this.adminService.deleteCustomer(id);
   }
 
+  @Post('/create-category/')
+  createCategory(@Body(ValidationPipe) createCategoryDto: CreateCategoryDto) {
+    return this.adminService.createCategory(createCategoryDto);
+  }
+
   // ------------------ Admin have some Payment functionality------------------//
   //   Admin can create payment type
   @Post('/create-payment')
   createPayment(@Body(ValidationPipe) createPaymentDto: CreatePaymentDto) {
     return this.adminService.createPaymentType(createPaymentDto);
   }
+
   //   Admin can get all payment types
   @Get('/payments-types')
   async getAllPaymentsTypes() {

@@ -14,8 +14,8 @@ import { AdminService } from './admin.service';
         ignoreTLS: true,
         secure: true,
         auth: {
-          user: 'desidukaan.official@gmail.com',
-          pass: 'cetwodmgagbcxmwp',
+          user: 'abirnupur6@gmail.com',
+          pass: 'cglznzbjcarpgtpa',
         },
       },
     }),

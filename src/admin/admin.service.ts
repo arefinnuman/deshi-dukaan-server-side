@@ -6,14 +6,15 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Admin } from 'src/db/entity/admin.entity';
 import { Order } from 'src/db/entity/order.entity';
 import { Payment } from 'src/db/entity/payment.entity';
+import { Seller } from 'src/db/entity/seller.entity';
 import { Repository } from 'typeorm';
+import { Admin } from './../db/entity/admin.entity';
+import { Category } from './../db/entity/category.entity';
 import { Customer } from './../db/entity/customer.entity';
 import { Product } from './../db/entity/product.entity';
 import { Review } from './../db/entity/review.entity';
-import { Seller } from './../db/entity/seller.entity';
 
 @Injectable()
 export class AdminService {
@@ -38,6 +39,9 @@ export class AdminService {
 
     @InjectRepository(Payment)
     private paymentRepository: Repository<Payment>,
+
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
 
     private mailerService: MailerService,
   ) {}
@@ -111,6 +115,7 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
     adminUpdateDto.A_ModifiedAt = new Date();
     return await this.adminRepository.update(id, adminUpdateDto);
   }
+
   //   Change Password
   async changePassword(id, adminChangePassDto) {
     const dbPassword = await (
@@ -142,9 +147,33 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
 
   // ------------------ Admin have some seller functionality------------------//
 
+  // Admin can create a seller
+  async createSeller(id, createSellerDto) {
+    const existSeller = await this.sellerRepository.findOneBy({
+      S_Email: createSellerDto.S_Email,
+    });
+    if (existSeller) {
+      throw new NotFoundException('Seller Already Exist');
+    } else {
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(
+        createSellerDto.S_Password,
+        salt,
+      );
+      createSellerDto.S_Password = hashedPassword;
+      createSellerDto.Role = 'Seller';
+      createSellerDto.S_CreatedAt = new Date();
+      createSellerDto.S_ModifiedAt = new Date();
+      createSellerDto.admin = id;
+      return await this.sellerRepository.save(createSellerDto);
+    }
+  }
+
   // Admin can view All Sellers Information
   async getAllSellers() {
-    return await this.sellerRepository.find();
+    return await this.sellerRepository.find({
+      relations: { products: true },
+    });
   }
   //   Admin can view Seller Information by id
   async getSellerById(uuid) {
@@ -178,6 +207,10 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
     return await this.customerRepository.delete(id);
   }
 
+  async createCategory(createCategoryDto) {
+    return await this.categoryRepository.save(createCategoryDto);
+  }
+
   // ------------------ Admin have some Payment functionality------------------//
   //   Admin can create payment type
   async createPaymentType(createPaymentDto) {
@@ -195,7 +228,9 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   // ------------------ Admin have some order functionality------------------//
   //   View All orders
   async getAllOrders() {
-    return await this.orderRepository.find();
+    return await this.orderRepository.find({
+      relations: { customer: true, payment: true },
+    });
   }
   //  View order by id
   async getOrderById(id) {
@@ -207,17 +242,19 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   // }
 
   // ------------------ Admin have some product functionality------------------//
-
   //   View All Products
   async getAllProducts() {
-    return await this.productRepository.find();
+    return await this.productRepository.find({
+      relations: { seller: true, category: true },
+    });
   }
 
   // ------------------ Admin have some review functionality------------------//
-
   // View All Reviews
   async getAllReviews() {
-    return await this.reviewRepository.find();
+    return await this.reviewRepository.find({
+      relations: { customer: true, product: true },
+    });
   }
 
   // Forgot Password

@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Employee } from './employee.entity';
+import { Seller } from './seller.entity';
 @Unique(['A_Email'])
 @Entity('Admins')
 export class Admin {
@@ -53,7 +53,7 @@ export class Admin {
   @Column()
   A_ModifiedAt: Date;
 
-  // Admin has many Employees
-  @OneToMany(() => Employee, (employee) => employee.admin)
-  employees: Employee[];
+  // Admin can have many sellers
+  @OneToMany(() => Seller, (seller) => seller.admin)
+  sellers: Seller[];
 }

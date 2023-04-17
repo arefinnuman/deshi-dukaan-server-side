@@ -4,7 +4,6 @@ import { Admin } from './entity/admin.entity';
 import { Category } from './entity/category.entity';
 import { Customer } from './entity/customer.entity';
 import { CustomerPayment } from './entity/customerPayment.entity';
-import { Employee } from './entity/employee.entity';
 import { Order } from './entity/order.entity';
 import { OrderDetail } from './entity/orderDetail.entity';
 import { Payment } from './entity/payment.entity';
@@ -17,7 +16,6 @@ import { Seller } from './entity/seller.entity';
   imports: [
     TypeOrmModule.forFeature([
       Admin,
-      Employee,
       Seller,
       Customer,
       Product,

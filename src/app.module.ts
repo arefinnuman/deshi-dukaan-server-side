@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdminModule } from './admin/admin.module';
 import { CustomerModule } from './customer/customer.module';
 import { DbModule } from './db/db.module';
+import { SellerModule } from './seller/seller.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -15,9 +16,11 @@ import { DbModule } from './db/db.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+
     DbModule,
     AdminModule,
     CustomerModule,
+    SellerModule,
   ],
   controllers: [],
   providers: [],

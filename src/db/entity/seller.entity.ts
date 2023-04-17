@@ -2,9 +2,12 @@ import {
   Column,
   Entity,
   Generated,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Admin } from './admin.entity';
 import { Product } from './product.entity';
 @Entity('Sellers')
 export class Seller {
@@ -48,10 +51,10 @@ export class Seller {
   @Column()
   S_Status: string;
 
-  @Column()
+  @Column({ nullable: true })
   Role: string;
 
-  @Column()
+  @Column({ nullable: true })
   S_Verified: boolean;
 
   @Column()
@@ -59,6 +62,11 @@ export class Seller {
 
   @Column()
   S_ModifiedAt: Date;
+
+  // Seller may be have one Admin
+  @ManyToOne(() => Admin, (admin) => admin.sellers)
+  @JoinColumn({ name: 'FK_AdminId' })
+  admin: Admin;
 
   // Seller has many Products
   @OneToMany(() => Product, (product) => product.seller)

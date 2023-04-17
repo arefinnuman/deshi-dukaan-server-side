@@ -1,19 +1,22 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
+  Put,
   Session,
   UnauthorizedException,
   ValidationPipe,
 } from '@nestjs/common';
 import { CreateProductDto } from './dto/createProduct.dto';
-import { SellerSignInDto } from './dto/sellerSignInDto';
 import { SellerRegisterDto } from './dto/sRegister.dto';
+import { SellerSignInDto } from './dto/sellerSignInDto';
 import { SellerService } from './seller.service';
 
-@Controller('seller')
+@Controller('/seller')
 export class SellerController {
   constructor(private sellerService: SellerService) {}
 
@@ -52,38 +55,38 @@ export class SellerController {
   // Seller can create product
   @Post('/create-product/:id')
   createProduct(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) createProductDto: CreateProductDto,
   ) {
     return this.sellerService.createProduct(id, createProductDto);
   }
 
   // Delete Product
-  @Get('/delete-product/:id')
+  @Delete('/delete-product/:id')
   async deleteProduct(@Param('id') id: number) {
     return await this.sellerService.deleteProduct(id);
   }
 
   // Delete Account
-  @Get('/delete-account/:id')
+  @Delete('/delete-account/:id')
   async deleteAccount(@Param('id') id: number) {
     return await this.sellerService.deleteAccount(id);
   }
 
   // Seller can view her/his products
   @Get('/view-products/:id')
-  async viewProducts(@Param('id') id: number) {
+  async viewProducts(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.viewProducts(id);
   }
 
   // Seller can view her/his product
   @Get('/view-product/:id')
-  async viewProduct(@Param('id') id: number) {
+  async viewProduct(@Param('id', ParseIntPipe) id: number) {
     return await this.sellerService.viewProduct(id);
   }
 
   // Seller can update her/his profile
-  @Post('/update-profile/:id')
+  @Put('/update-profile/:id')
   async updateProfile(
     @Param('id') id: number,
     @Body(ValidationPipe) sellerRegisterDto: SellerRegisterDto,

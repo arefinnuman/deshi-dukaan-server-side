@@ -55,17 +55,17 @@ export class SellerService {
 
   // Seller can view her/his own product
   async viewProduct(id) {
-    return await this.productRepo.findOne(id);
+    return await this.productRepo.findOneBy({ P_Id: id });
   }
 
   // Seller can view her/his own products
   async viewProducts(id) {
-    return await this.productRepo.find({ where: { seller: id } });
+    return await this.productRepo.findBy({ seller: id });
   }
 
   // Seller can view her/his own profile
   async viewProfile(id) {
-    return await this.sellerRepo.findOne(id);
+    return await this.sellerRepo.findOneBy(id);
   }
 
   // Seller can update her/his own profile
