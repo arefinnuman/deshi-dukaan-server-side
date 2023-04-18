@@ -99,16 +99,24 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
 
   // Get admin by UUId
+  // async getAdminById(uuid) {
+  //   const found = await this.adminRepository.findOneBy({ A_Uuid: uuid });
+  //   return found;
+  // }
+
   async getAdminById(uuid) {
-    const found = await this.adminRepository.findOneBy({ A_Uuid: uuid });
-    if (!found) {
-      throw new NotFoundException(`Admin with UUId ${uuid} not found`);
-    }
+    const found = await this.adminRepository.find({
+      where: { A_Uuid: uuid },
+      relations: ['sellers'],
+    });
     return found;
   }
+
   // Gell All Admins
   async getAllAdmins() {
-    return await this.adminRepository.find();
+    return await this.adminRepository.find({
+      relations: { sellers: true },
+    });
   }
   // Customer Update Profile
   async updateProfile(id, adminUpdateDto) {
@@ -192,7 +200,9 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
 
   //  Admin can view All Customers Information
   async getAllCustomers() {
-    return await this.customerRepository.find();
+    return await this.customerRepository.find({
+      relations: { orders: true },
+    });
   }
   //   Admin can view Customer Information by id
   async getCustomerById(uuid) {
