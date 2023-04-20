@@ -98,32 +98,27 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
     }
   }
 
-  // Get admin by UUId
-  // async getAdminById(uuid) {
-  //   const found = await this.adminRepository.findOneBy({ A_Uuid: uuid });
-  //   return found;
-  // }
-
   async getAdminById(uuid) {
     const found = await this.adminRepository.find({
       where: { A_Uuid: uuid },
       relations: ['sellers'],
     });
+    if (!found) {
+      throw new NotFoundException(`Admin with UUId ${uuid} not found`);
+    }
     return found;
   }
-
   // Gell All Admins
   async getAllAdmins() {
     return await this.adminRepository.find({
       relations: { sellers: true },
     });
   }
-  // Customer Update Profile
+  //  Update Profile
   async updateProfile(id, adminUpdateDto) {
     adminUpdateDto.A_ModifiedAt = new Date();
     return await this.adminRepository.update(id, adminUpdateDto);
   }
-
   //   Change Password
   async changePassword(id, adminChangePassDto) {
     const dbPassword = await (
@@ -154,7 +149,6 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
 
   // ------------------ Admin have some seller functionality------------------//
-
   // Admin can create a seller
   async createSeller(id, createSellerDto) {
     const existSeller = await this.sellerRepository.findOneBy({
@@ -176,7 +170,6 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
       return await this.sellerRepository.save(createSellerDto);
     }
   }
-
   // Admin can view All Sellers Information
   async getAllSellers() {
     return await this.sellerRepository.find({
@@ -185,7 +178,10 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
   //   Admin can view Seller Information by id
   async getSellerById(uuid) {
-    const found = await this.sellerRepository.findOneBy({ S_Uuid: uuid });
+    const found = await this.sellerRepository.find({
+      where: { S_Uuid: uuid },
+      relations: ['products'],
+    });
     if (!found) {
       throw new NotFoundException(`Seller with UUId ${uuid} not found`);
     }
@@ -197,7 +193,6 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
 
   // ------------------ Admin have some customer functionality------------------//
-
   //  Admin can view All Customers Information
   async getAllCustomers() {
     return await this.customerRepository.find({
@@ -206,7 +201,10 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
   //   Admin can view Customer Information by id
   async getCustomerById(uuid) {
-    const found = await this.customerRepository.findOneBy({ C_Uuid: uuid });
+    const found = await this.customerRepository.find({
+      where: { C_Uuid: uuid },
+      relations: ['orders'],
+    });
     if (!found) {
       throw new NotFoundException(`Customer with UUId ${uuid} not found`);
     }
@@ -244,18 +242,24 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
   }
   //  View order by id
   async getOrderById(id) {
-    return await this.orderRepository.findOne(id);
+    return await this.orderRepository.find({
+      where: { OrderId: id },
+      relations: ['customer', 'payment'],
+    });
   }
-  //  View order by customer id
-  // async getOrderByCustomerId(id) {
-  //   return await this.orderRepository.find({ where: { O_CustomerId: id } });
-  // }
 
   // ------------------ Admin have some product functionality------------------//
   //   View All Products
   async getAllProducts() {
     return await this.productRepository.find({
       relations: { seller: true, category: true },
+    });
+  }
+  //  View Product by id
+  async getProductById(uuid) {
+    return await this.productRepository.find({
+      where: { P_Uuid: uuid },
+      relations: ['seller', 'category'],
     });
   }
 
@@ -266,6 +270,4 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
       relations: { customer: true, product: true },
     });
   }
-
-  // Forgot Password
 }

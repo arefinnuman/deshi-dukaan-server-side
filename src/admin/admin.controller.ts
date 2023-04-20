@@ -108,7 +108,6 @@ export class AdminController {
   ) {
     return this.adminService.changePassword(id, adminChangePassDto);
   }
-
   //   Delete Admin
   @Delete('/delete-admin/:id')
   async deleteAdmin(@Param('id', ParseIntPipe) id: number) {
@@ -125,7 +124,6 @@ export class AdminController {
   ) {
     return await this.adminService.createSeller(id, createSellerDto);
   }
-
   //   Get All Sellers
   @Get('/sellers')
   async getAllSellers() {
@@ -190,8 +188,8 @@ export class AdminController {
   }
   //  View order by id
   @Get('/order/:id')
-  async getOrderById(@Param('id', ParseUUIDPipe) uuid) {
-    return await this.adminService.getOrderById(uuid);
+  async getOrderById(@Param('id', ParseIntPipe) id) {
+    return await this.adminService.getOrderById(id);
   }
   //  View order by customer id
   // @Get('/order/customer/:id')
@@ -204,6 +202,11 @@ export class AdminController {
   @Get('/products')
   async getAllProducts() {
     return await this.adminService.getAllProducts();
+  }
+  //   View Product by id
+  @Get('/product/:id')
+  async getProductById(@Param('id', ParseUUIDPipe) uuid) {
+    return await this.adminService.getProductById(uuid);
   }
 
   // ------------------ Admin have some review functionality------------------//
