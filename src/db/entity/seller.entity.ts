@@ -48,7 +48,7 @@ export class Seller {
   @Column({ nullable: true })
   S_CompanyLogo: string;
 
-  @Column()
+  @Column({ nullable: true })
   S_Status: string;
 
   @Column({ nullable: true })

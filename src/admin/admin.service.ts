@@ -164,6 +164,7 @@ http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
       );
       createSellerDto.S_Password = hashedPassword;
       createSellerDto.Role = 'Seller';
+      createSellerDto.S_Status = 'Pending';
       createSellerDto.S_CreatedAt = new Date();
       createSellerDto.S_ModifiedAt = new Date();
       createSellerDto.admin = id;
