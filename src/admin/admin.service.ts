@@ -15,6 +15,7 @@ import { Category } from './../db/entity/category.entity';
 import { Customer } from './../db/entity/customer.entity';
 import { Product } from './../db/entity/product.entity';
 import { Review } from './../db/entity/review.entity';
+import { AdminSignInDto } from './dto/adminSignInDto';
 
 @Injectable()
 export class AdminService {
@@ -48,6 +49,19 @@ export class AdminService {
 
   // Admin Can Sign-up and Sign in
   // Sign-up can be dome using createAdmin method
+  async adminLogin(loginDto: AdminSignInDto) {
+    const isValidCustomer = await await this.adminRepository.findOneBy({
+      A_Email: loginDto.A_Email,
+    });
+    if (
+      isValidCustomer &&
+      (await bcrypt.compare(loginDto.A_Password, isValidCustomer.A_Password))
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   // Sign-in
   async signIn(adminSignInDto) {
@@ -81,8 +95,8 @@ export class AdminService {
         to: createAdminDto.A_Email,
         subject: 'Welcome to DesiDukaan',
         text: `Hi, ${createAdminDto.A_Name}. Welcome to DesiDukaan.
-Please verify your email address by clicking on the link below.
-http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
+      Please verify your email address by clicking on the link below.
+      http://localhost:3333/admin/verify-email/?uid=${createAdminDto.A_Uuid}`,
       });
       return admin;
     }

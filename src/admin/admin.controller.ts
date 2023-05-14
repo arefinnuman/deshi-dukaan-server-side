@@ -33,26 +33,40 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   // Admin Can Sign-up and Sign in
+
+  @Post('/login')
+  async adminLogin(
+    @Session() session,
+    @Body(ValidationPipe) adminSignInDto: AdminSignInDto,
+  ) {
+    const isValid = this.adminService.adminLogin(adminSignInDto);
+    if ((await isValid.then((res) => res)) == true) {
+      session.email = adminSignInDto.A_Email;
+      return session.email;
+    } else {
+      return { message: 'Invalid credentials' };
+    }
+  }
   // Sign-up can be dome using createAdmin method
   @Post('sign-up')
   async signUp(@Body(ValidationPipe) createAdminDto: CreateAdminDto) {
     return await this.adminService.createAdmin(createAdminDto);
   }
   // Sign-in
-  @Post('sign-in')
-  async signIn(
-    @Session() session,
-    @Body(ValidationPipe) adminSignInDto: AdminSignInDto,
-  ) {
-    const found = await this.adminService.signIn(adminSignInDto);
-    if (found) {
-      session.A_Email = adminSignInDto.A_Email;
-      console.log(session.A_Email);
-      return { message: 'You are logged in' };
-    } else {
-      return { message: 'Invalid Credentials' };
-    }
-  }
+  // @Post('sign-in')
+  // async signIn(
+  //   @Session() session,
+  //   @Body(ValidationPipe) adminSignInDto: AdminSignInDto,
+  // ) {
+  //   const found = await this.adminService.signIn(adminSignInDto);
+  //   if (found) {
+  //     session.A_Email = adminSignInDto.A_Email;
+  //     console.log(session.A_Email);
+  //     return { message: 'You are logged in' };
+  //   } else {
+  //     return { message: 'Invalid Credentials' };
+  //   }
+  // }
   // Sign-out
   @Get('/sign-out')
   signout(@Session() session) {
